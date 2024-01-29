@@ -2,7 +2,6 @@ import { Controller, Post, Body, Res } from '@nestjs/common';
 import { TextToSpeechService } from './text-to-speech.service';
 import { Response } from 'express';
 import { ChatService } from './gpt.service';
-import { Console } from 'console';
 
 @Controller('text-to-speech')
 export class TextToSpeechController {
@@ -18,7 +17,7 @@ export class TextToSpeechController {
 
             const request = {
                 input: { text: gptResponse },
-                voice:{
+                Voice:{
                     languageCode: 'en-US',
                     name: 'en-US-Wavenet-F',
                     ssmlGander: 'FEMALE',                    

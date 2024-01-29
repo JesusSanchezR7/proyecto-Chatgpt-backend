@@ -1,17 +1,24 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { OpenAI } from 'openai';
 
 @Injectable()
 export class ChatService {
     private openai: OpenAI;
     private conversationHistory: {
-        role: "function" | "user" | "system" | "assistant";
+        role: "user" | "assistant" | "system";
         content: string;
     }[] = [];
 
     constructor() {
+        // Verifica la configuración de la variable de entorno OPENAI_API_KEY
+        if (!process.env.OPENAI_API_KEY) {
+            Logger.error('La variable de entorno OPENAI_API_KEY no está configurada.');
+        } else {
+            Logger.log('Valor de OPENAI_API_KEY:', process.env.OPENAI_API_KEY);
+        }
+
         this.openai = new OpenAI({
-            apiKey: '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',
+            apiKey: process.env.OPENAI_API_KEY,
         });
     }
 
@@ -21,19 +28,22 @@ export class ChatService {
             content: content,
         });
 
-        const chatCompletation = await this.openai.chat.completions.create({
+        const chatCompletion = await this.openai.chat.completions.create({
             messages: [
-                { role: "system", content: "soy tu asistente" },
-                //...this.conversationHistory
+                { role: "system", content: "you are a helpful assistant" },
+                ...this.conversationHistory.map(message => ({
+                    role: message.role,
+                    content: message.content
+                }))
             ],
-            model: 'gpt-3.5-turbo',
+            model: 'gpt-3.5-turbo', // 'turb' changed to 'turbo'
         });
 
         this.conversationHistory.push({
             role: 'assistant',
-            content: chatCompletation.choices[0].message.content,
+            content: chatCompletion.choices[0].message.content,
         });
 
-        return chatCompletation.choices[0].message.content;
+        return chatCompletion.choices[0].message.content;
     }
 }
